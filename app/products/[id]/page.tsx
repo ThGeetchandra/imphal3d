@@ -41,6 +41,7 @@ type Product = {
   is_available: boolean;
   is_customizable: boolean;
   is_phone_number_customizable: boolean;
+  stock_quantity: number | null;
 };
 
 const colourValues: Record<string, string> = {
@@ -167,6 +168,24 @@ export default function ProductPage() {
   const isCustomNameProduct = product.is_customizable === true;
   const isPhoneNumberProduct = product.is_phone_number_customizable === true;
 
+  const stockQuantity =
+    product.stock_quantity === null || product.stock_quantity === undefined
+      ? null
+      : Number(product.stock_quantity);
+
+  const isOutOfStock = stockQuantity !== null && stockQuantity <= 0;
+
+  const stockLabel =
+    stockQuantity === null
+      ? null
+      : stockQuantity <= 0
+        ? "Out of Stock"
+        : stockQuantity <= 5
+          ? `Only ${stockQuantity} ${
+              stockQuantity === 1 ? "piece" : "pieces"
+            } left`
+          : "In Stock";
+
   const selectedBasePrice =
     selectedSize &&
     product.size_prices &&
@@ -274,6 +293,11 @@ export default function ProductPage() {
   async function buyNow() {
     if (!product) return;
 
+    if (isOutOfStock) {
+      alert("This product is currently out of stock.");
+      return;
+    }
+
     if (!(await checkPincode())) return;
 
     if (isCustomNameProduct && !customName.trim()) {
@@ -320,6 +344,11 @@ export default function ProductPage() {
 
   async function addToCart() {
     if (!product) return;
+
+    if (isOutOfStock) {
+      alert("This product is currently out of stock.");
+      return;
+    }
 
     if (!(await checkPincode())) return;
 
@@ -389,7 +418,7 @@ export default function ProductPage() {
     <main className="min-h-screen overflow-x-hidden bg-[#08090a] font-[Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif] text-white selection:bg-orange-500 selection:text-black">
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#111214]/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <a href="/" className="group shrink-0 flex items-center gap-3">
             <div>
               <div className="text-2xl font-black tracking-tight sm:text-3xl">
@@ -414,7 +443,7 @@ export default function ProductPage() {
       </header>
 
       {/* BREADCRUMB */}
-      <div className="mx-auto max-w-7xl px-6 pt-6">
+      <div className="mx-auto w-full min-w-0 max-w-7xl px-4 pt-5 sm:px-6 sm:pt-6">
         <nav className="flex items-center gap-2 text-xs font-medium text-gray-400">
           <a href="/" className="transition hover:text-orange-400">
             Home
@@ -425,12 +454,12 @@ export default function ProductPage() {
       </div>
 
       {/* PRODUCT MAIN SECTION */}
-      <section className="mx-auto max-w-7xl px-6 py-8 lg:py-12">
-        <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+      <section className="mx-auto w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:py-12">
+        <div className="grid w-full min-w-0 items-start gap-8 lg:grid-cols-2 lg:gap-16">
           
           {/* LEFT: IMAGES & HIGHLIGHTS */}
-          <div className="space-y-6 lg:sticky lg:top-24">
-            <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-[#16181c] to-[#111214] shadow-2xl transition-all duration-300 hover:border-white/20">
+          <div className="min-w-0 w-full space-y-5 lg:sticky lg:top-24 lg:space-y-6">
+            <div className="group relative w-full min-w-0 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-[#16181c] to-[#111214] shadow-2xl transition-all duration-300 hover:border-white/20">
               
               {/* Subtle background glow */}
               <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-orange-500/10 blur-3xl" />
@@ -442,19 +471,19 @@ export default function ProductPage() {
                 </div>
               )}
 
-              <div className="relative flex min-h-[420px] items-center justify-center p-8 sm:min-h-[520px] sm:p-12">
+              <div className="relative flex h-[78vw] min-h-[300px] max-h-[520px] w-full min-w-0 items-center justify-center p-4 sm:h-auto sm:min-h-[420px] sm:p-12">
                 {displayedImage ? (
                   <button
                     type="button"
                     onClick={() => setShowImageModal(true)}
-                    className="flex h-full w-full items-center justify-center cursor-zoom-in"
+                    className="flex h-full w-full min-w-0 items-center justify-center cursor-zoom-in"
                     aria-label={`Enlarge ${product.name} image`}
                     title="Click to enlarge"
                   >
                     <img
                       src={displayedImage}
                       alt={`${product.name} ${selectedColour || ""}`}
-                      className="max-h-[460px] w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105 sm:max-h-[460px]"
                     />
                   </button>
                 ) : (
@@ -469,7 +498,7 @@ export default function ProductPage() {
             </div>
 
             {galleryImages.length > 1 && (
-              <div className="rounded-3xl border border-white/10 bg-[#111214] p-4">
+              <div className="w-full min-w-0 overflow-hidden rounded-3xl border border-white/10 bg-[#111214] p-3 sm:p-4">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">
                     Product Gallery
@@ -479,7 +508,7 @@ export default function ProductPage() {
                   </span>
                 </div>
 
-                <div className="flex gap-3 overflow-x-auto pb-1">
+                <div className="flex min-w-0 max-w-full gap-3 overflow-x-auto pb-1">
                   {galleryImages.map((image) => {
                     const isSelected =
                       image.src === displayedImage;
@@ -566,7 +595,7 @@ export default function ProductPage() {
           </div>
 
           {/* RIGHT: BUYING OPTIONS */}
-          <div className="flex flex-col">
+          <div className="min-w-0 w-full flex flex-col">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3.5 py-1 text-[11px] font-black tracking-widest text-orange-400 uppercase">
               <Sparkles className="h-3.5 w-3.5" />
               {product.category || "3D PRINTED PRODUCT"}
@@ -621,6 +650,37 @@ export default function ProductPage() {
                 <span className="text-xs font-bold tracking-wide text-emerald-400">Ready to Print & Pickup</span>
               </div>
             </div>
+
+            {/* STOCK STATUS */}
+            {stockLabel && (
+              <div
+                className={`mt-4 flex items-center gap-3 rounded-2xl border px-4 py-3 ${
+                  isOutOfStock
+                    ? "border-red-500/30 bg-red-500/10 text-red-400"
+                    : stockQuantity !== null && stockQuantity <= 5
+                      ? "border-orange-500/30 bg-orange-500/10 text-orange-400"
+                      : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                }`}
+              >
+                <span
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                    isOutOfStock
+                      ? "bg-red-500"
+                      : stockQuantity !== null && stockQuantity <= 5
+                        ? "bg-orange-500"
+                        : "bg-emerald-500"
+                  }`}
+                />
+                <div>
+                  <p className="text-sm font-black">{stockLabel}</p>
+                  {!isOutOfStock && stockQuantity !== null && stockQuantity <= 5 && (
+                    <p className="mt-0.5 text-[11px] font-medium opacity-80">
+                      Order soon before it sells out.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* CUSTOM NAME FIELD */}
             {isCustomNameProduct && (
@@ -888,17 +948,28 @@ export default function ProductPage() {
               <button
                 type="button"
                 onClick={buyNow}
-                className="rounded-2xl bg-orange-500 py-4 text-center text-sm font-black text-black shadow-lg shadow-orange-500/20 transition-all hover:bg-orange-400 hover:shadow-orange-400/30 active:scale-95"
+                disabled={isOutOfStock}
+                className={`rounded-2xl py-4 text-center text-sm font-black shadow-lg transition-all active:scale-95 ${
+                  isOutOfStock
+                    ? "cursor-not-allowed bg-gray-700 text-gray-400 shadow-none"
+                    : "bg-orange-500 text-black shadow-orange-500/20 hover:bg-orange-400 hover:shadow-orange-400/30"
+                }`}
               >
-                Buy Now
+                {isOutOfStock ? "Out of Stock" : "Buy Now"}
               </button>
 
               <button
                 type="button"
                 onClick={addToCart}
-                className="flex items-center justify-center gap-2 rounded-2xl border border-orange-500/50 bg-orange-500/10 py-4 text-sm font-black text-orange-400 transition-all hover:bg-orange-500 hover:text-black active:scale-95"
+                disabled={isOutOfStock}
+                className={`flex items-center justify-center gap-2 rounded-2xl border py-4 text-sm font-black transition-all active:scale-95 ${
+                  isOutOfStock
+                    ? "cursor-not-allowed border-white/10 bg-gray-700 text-gray-400"
+                    : "border-orange-500/50 bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-black"
+                }`}
               >
-                <ShoppingCart className="h-4 w-4" /> Add to Cart
+                <ShoppingCart className="h-4 w-4" />
+                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
               </button>
             </div>
 
