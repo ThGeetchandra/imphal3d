@@ -43,6 +43,7 @@ type Order = {
   amount: number | null;
   status: string;
   created_at: string;
+  phone_number_to_print?: string | null;
 };
 
 function formatCustomerRequest(value: string | null) {
@@ -55,9 +56,13 @@ function formatCustomerRequest(value: string | null) {
     .trim();
 
   const labels = [
+    "Name / Text to Print",
     "Custom Name",
+    "Phone Number to Print",
+    "Phone Number",
     "Quantity",
     "Pickup Location",
+    "PIN Code",
     "Product ID",
   ];
 
@@ -74,7 +79,7 @@ function formatCustomerRequest(value: string | null) {
     .filter(Boolean)
     .map((line) => {
       const match = line.match(
-        /^(Custom Name|Quantity|Pickup Location|Product ID)\s*:?\s*(.*)$/i
+        /^(Name \/ Text to Print|Custom Name|Phone Number to Print|Phone Number|Quantity|Pickup Location|PIN Code|Product ID)\s*:?\s*(.*)$/i
       );
 
       if (match) {
@@ -153,12 +158,16 @@ export default function AdminOrdersPage() {
     const [
       { data, error: fetchError },
       { data: productsData, error: productsError },
+      { data: orderItemsData, error: orderItemsError },
     ] = await Promise.all([
       supabase
         .from("orders")
         .select("*")
         .order("created_at", { ascending: false }),
       supabase.from("products").select("id, image_url"),
+      supabase
+        .from("order_items")
+        .select("order_id, phone_number"),
     ]);
 
     if (fetchError) {
@@ -168,7 +177,29 @@ export default function AdminOrdersPage() {
       return;
     }
 
-    setOrders((data || []) as Order[]);
+    if (orderItemsError) {
+      console.warn("Could not load order item personalization:", orderItemsError);
+    }
+
+    const phoneByOrderId: Record<number, string> = {};
+
+    for (const item of orderItemsData || []) {
+      const orderId = Number(item.order_id);
+      const phoneNumber = item.phone_number
+        ? String(item.phone_number).trim()
+        : "";
+
+      if (Number.isFinite(orderId) && phoneNumber) {
+        phoneByOrderId[orderId] = phoneNumber;
+      }
+    }
+
+    const ordersWithPersonalization = (data || []).map((order) => ({
+      ...(order as Order),
+      phone_number_to_print: phoneByOrderId[Number(order.id)] || null,
+    }));
+
+    setOrders(ordersWithPersonalization);
 
     if (productsError) {
       console.warn("Could not load product images:", productsError);
@@ -641,10 +672,28 @@ export default function AdminOrdersPage() {
                       <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-zinc-500">
                         Customer Request
                       </p>
-                      {order.custom_description ? (
-                        <div className="grid gap-2.5 sm:grid-cols-2">
-                          {formatCustomerRequest(order.custom_description).map(
-                            (item, index) => (
+
+                      <div className="grid gap-2.5 sm:grid-cols-2">
+                        {order.phone_number_to_print && (
+                          <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-3">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-orange-400">
+                              Phone Number to Print
+                            </p>
+                            <p className="mt-0.5 break-words text-sm font-black text-white">
+                              {order.phone_number_to_print}
+                            </p>
+                          </div>
+                        )}
+
+                        {order.custom_description &&
+                          formatCustomerRequest(order.custom_description)
+                            .filter(
+                              (item) =>
+                                item.label.toLowerCase() !==
+                                  "phone number to print" &&
+                                item.label.toLowerCase() !== "phone number"
+                            )
+                            .map((item, index) => (
                               <div
                                 key={`${order.id}-${index}`}
                                 className="rounded-xl border border-white/10 bg-[#08090a] p-3"
@@ -656,14 +705,17 @@ export default function AdminOrdersPage() {
                                   {item.value || "—"}
                                 </p>
                               </div>
-                            )
+                            ))}
+
+                        {!order.phone_number_to_print &&
+                          !order.custom_description && (
+                            <div className="rounded-xl border border-dashed border-white/10 bg-[#08090a] p-3 sm:col-span-2">
+                              <p className="text-xs text-zinc-500">
+                                No additional details supplied
+                              </p>
+                            </div>
                           )}
-                        </div>
-                      ) : (
-                        <div className="rounded-xl border border-dashed border-white/10 bg-[#08090a] p-3">
-                          <p className="text-xs text-zinc-500">No additional details supplied</p>
-                        </div>
-                      )}
+                      </div>
                     </div>
 
                     {/* PAYMENT DETAILS */}

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   MapPin,
-  Search,
   ShoppingBag,
   ShoppingCart,
   Printer,
@@ -18,7 +17,6 @@ import {
   ShieldCheck,
   Package,
   ChevronRight,
-  User,
 } from "lucide-react";
 
 type Product = {
@@ -41,7 +39,6 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [cartCount, setCartCount] = useState(0);
 
@@ -119,21 +116,13 @@ export default function Home() {
   );
 
   const filteredProducts = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
     return products.filter((product) => {
-      const matchesSearch =
-        !query ||
-        product.name.toLowerCase().includes(query) ||
-        Boolean(product.category?.toLowerCase().includes(query));
-
-      const matchesCategory =
+      return (
         selectedCategory === "All" ||
-        (product.category || "").trim() === selectedCategory;
-
-      return matchesSearch && matchesCategory;
+        (product.category || "").trim() === selectedCategory
+      );
     });
-  }, [products, searchQuery, selectedCategory]);
+  }, [products, selectedCategory]);
 
   function getStockLabel(stockQuantity: number | null) {
     if (stockQuantity === null || stockQuantity === undefined) {
@@ -289,19 +278,6 @@ export default function Home() {
               </div>
             </a>
 
-            <div className="hidden flex-1 md:block md:max-w-md">
-              <div className="group flex items-center rounded-2xl border border-white/10 bg-[#121316] px-4 py-2.5 transition hover:border-white/20 focus-within:border-orange-500/50">
-                <Search className="mr-3 h-4 w-4 text-gray-400 transition group-focus-within:text-orange-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="w-full bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-500"
-                />
-              </div>
-            </div>
-
             <div className="flex items-center gap-2 sm:gap-3">
               <a
                 href="/track-order"
@@ -310,14 +286,6 @@ export default function Home() {
                 <Package className="h-3.5 w-3.5" />
                 Track Order
               </a>
-
-              <button
-                type="button"
-                className="hidden items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-400 transition hover:text-white lg:flex"
-              >
-                <User className="h-3.5 w-3.5" />
-                Login
-              </button>
 
               <a
                 href="/cart"
@@ -339,18 +307,6 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="border-t border-white/5 px-4 py-2 md:hidden">
-            <div className="mx-auto flex max-w-7xl items-center rounded-xl border border-white/10 bg-[#121316] px-3 py-2">
-              <Search className="mr-2 h-4 w-4 text-gray-500" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="w-full bg-transparent text-xs text-gray-200 outline-none placeholder:text-gray-500"
-              />
-            </div>
-          </div>
         </header>
 
         <nav className="sticky top-[101px] z-30 border-b border-white/5 bg-[#0d0e10]/80 backdrop-blur-md md:top-[89px]">
@@ -636,19 +592,16 @@ export default function Home() {
                 <ShoppingBag className="h-12 w-12 stroke-[1.5] text-gray-500" />
                 <h3 className="mt-4 text-xl font-bold">No Products Found</h3>
                 <p className="mt-1 max-w-md text-xs text-gray-500">
-                  Try another search or choose a different category.
+                  Try choosing a different category.
                 </p>
 
-                {(searchQuery || selectedCategory !== "All") && (
+                {selectedCategory !== "All" && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setSelectedCategory("All");
-                    }}
+                    onClick={() => setSelectedCategory("All")}
                     className="mt-5 rounded-xl bg-orange-500 px-5 py-2.5 text-xs font-black text-black transition hover:bg-orange-400"
                   >
-                    Clear Filters
+                    View All Products
                   </button>
                 )}
               </div>
@@ -857,3 +810,4 @@ export default function Home() {
     </main>
   );
 }
+
