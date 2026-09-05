@@ -102,6 +102,9 @@ function CheckoutContent() {
   const needsPrintName =
     isCustomizable && !isCartCheckout;
 
+  const isPetNameTag = product.trim().toLowerCase().includes("pet name tag");
+  const customNameMaxLength = isPetNameTag ? 10 : 30;
+
   const [savingOrder, setSavingOrder] = useState(false);
 
 
@@ -211,6 +214,25 @@ function CheckoutContent() {
     if (pincode.length !== 6) {
       setFormError("Please enter a valid 6-digit PIN code.");
       return;
+    }
+
+    if (needsPrintName && customName.trim().length > customNameMaxLength) {
+      setFormError(
+        `The name for this ${isPetNameTag ? "Pet Name Tag" : "product"} can be a maximum of ${customNameMaxLength} characters.`
+      );
+      return;
+    }
+
+    if (isCartCheckout) {
+      const invalidPetName = cartItems.find(
+        (item) =>
+          item.name.trim().toLowerCase().includes("pet name tag") &&
+          item.customName.trim().length > 10
+      );
+      if (invalidPetName) {
+        setFormError("Pet Name Tag names can be a maximum of 10 characters.");
+        return;
+      }
     }
 
     if (utr.length !== 12) {
@@ -1189,6 +1211,16 @@ Imphal3D`.trim();
                 UTR will be sent to
                 Imphal3D on WhatsApp.
 
+              </p>
+
+              <p className="whatsapp-note" style={{ marginTop: "8px" }}>
+                Email: {" "}
+                <a
+                  href="mailto:imphal3d@gmail.com"
+                  style={{ color: "#f97316", fontWeight: 700 }}
+                >
+                  imphal3d@gmail.com
+                </a>
               </p>
 
             </div>

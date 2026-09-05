@@ -715,6 +715,15 @@ export default function Home() {
                     +91 97744 24640
                   </a>
                 </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-base text-orange-500">✉</span>
+                  <a
+                    href="mailto:imphal3d@gmail.com"
+                    className="transition hover:text-white"
+                  >
+                    imphal3d@gmail.com
+                  </a>
+                </li>
               </ul>
 
               <div className="mt-5 flex flex-wrap gap-2">
