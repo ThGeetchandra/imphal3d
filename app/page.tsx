@@ -43,7 +43,7 @@ export default function Home() {
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowIntro(false), 2400);
+    const timer = setTimeout(() => setShowIntro(false), 1700);
     return () => clearTimeout(timer);
   }, []);
 
@@ -211,7 +211,7 @@ export default function Home() {
       )}
 
       <div
-        className={`transition-opacity duration-700 ${
+        className={`transition-opacity duration-300 ${
           showIntro ? "pointer-events-none opacity-0" : "opacity-100"
         }`}
       >
@@ -810,4 +810,3 @@ export default function Home() {
     </main>
   );
 }
-

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { MapPin, Phone, RefreshCw, User } from "lucide-react";
 
 type Order = {
   id: number;
@@ -44,9 +45,13 @@ function formatRequest(value: string | null) {
     .trim();
 
   const labels = [
+    "Name / Text to Print",
     "Custom Name",
+    "Phone Number to Print",
+    "Phone Number",
     "Quantity",
     "Pickup Location",
+    "PIN Code",
     "Product ID",
   ];
 
@@ -254,9 +259,9 @@ export default function TrackOrderPage() {
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl text-gray-500">
-            Enter the Order Number shown after your
-            order is submitted to see the latest
-            status.
+            Enter your Order Number to see the latest
+            status, order details, personalization and
+            pickup information.
           </p>
 
         </div>
@@ -291,7 +296,7 @@ export default function TrackOrderPage() {
                 }
               }}
               placeholder="Example: I3D-20260901-1234"
-              className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#08090a] px-4 py-4 text-lg text-white outline-none placeholder:text-gray-600 focus:border-orange-500"
+              className="min-w-0 w-full flex-1 rounded-xl border border-white/10 bg-[#08090a] px-4 py-4 text-base font-bold text-white outline-none placeholder:text-gray-600 focus:border-orange-500 sm:text-lg"
             />
 
             <button
@@ -344,14 +349,65 @@ export default function TrackOrderPage() {
                   </p>
                 </div>
 
-                <span className="self-start rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-2 text-sm font-black text-orange-400">
-                  {order.status}
-                </span>
+                <div className="flex flex-wrap items-center gap-2 self-start">
+                  <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-2 text-sm font-black text-orange-400">
+                    {order.status}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      loadOrder(
+                        order.order_number || String(order.id),
+                        setOrder,
+                        setLoading,
+                        setError,
+                        false
+                      )
+                    }
+                    disabled={loading}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#08090a] px-4 py-2 text-xs font-bold text-gray-400 transition hover:border-white/20 hover:text-white disabled:opacity-50"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+                    Refresh
+                  </button>
+                </div>
 
               </div>
 
             </div>
 
+
+            {/* QUICK SUMMARY */}
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-[#111214] p-4">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <User className="h-4 w-4" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Customer</span>
+                </div>
+                <p className="mt-2 truncate text-sm font-black text-white">{order.customer_name}</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111214] p-4">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Phone className="h-4 w-4" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Contact</span>
+                </div>
+                <p className="mt-2 text-sm font-black text-white">{order.customer_phone || "—"}</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111214] p-4">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Pickup</span>
+                </div>
+                <p className="mt-2 truncate text-sm font-black text-white">
+                  {formatRequest(order.custom_description).find(
+                    (item) => item.label.toLowerCase() === "pickup location"
+                  )?.value || "Pickup location confirmed"}
+                </p>
+              </div>
+            </div>
 
             {/* PROGRESS */}
 
@@ -360,6 +416,9 @@ export default function TrackOrderPage() {
               <h2 className="text-2xl font-black">
                 Order Progress
               </h2>
+              <p className="mt-2 text-sm text-gray-500">
+                Your order moves through these stages as Imphal3D prepares it for pickup.
+              </p>
 
               <div className="mt-8">
 
@@ -525,6 +584,19 @@ export default function TrackOrderPage() {
                       {order.color}
                     </strong>
                   </div>
+
+                  {(() => {
+                    const quantity = formatRequest(order.custom_description).find(
+                      (item) => item.label.toLowerCase() === "quantity"
+                    )?.value;
+
+                    return quantity ? (
+                      <div className="flex justify-between gap-4 border-b border-white/10 pb-3">
+                        <span className="text-gray-500">Quantity</span>
+                        <strong>{quantity}</strong>
+                      </div>
+                    ) : null;
+                  })()}
 
                   {order.amount !== null && (
                     <div className="flex justify-between gap-4 pt-1">

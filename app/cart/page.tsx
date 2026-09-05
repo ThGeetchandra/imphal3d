@@ -10,7 +10,13 @@ import {
   ShoppingCart,
   ArrowRight,
   MapPin,
+  CheckCircle2,
+  AlertTriangle,
+  Phone,
+  Type,
 } from "lucide-react";
+
+import { supabase } from "@/lib/supabase";
 
 type CartItem = {
   productId: number;
@@ -23,11 +29,13 @@ type CartItem = {
   customName: string;
   phoneNumber?: string;
   pincode?: string;
+  stock_quantity?: number | null;
 };
 
 export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
+  const [stockLoaded, setStockLoaded] = useState(false);
 
   useEffect(() => {
     try {
@@ -40,6 +48,77 @@ export default function CartPage() {
       setReady(true);
     }
   }, []);
+
+  // Refresh stock from Supabase so customers cannot accidentally
+  // increase a cart item beyond the current available quantity.
+  useEffect(() => {
+    if (!ready || !items.length) {
+      setStockLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function refreshStock() {
+      const productIds = [...new Set(items.map((item) => Number(item.productId)).filter(Boolean))];
+
+      if (!productIds.length) {
+        setStockLoaded(true);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, stock_quantity")
+        .in("id", productIds);
+
+      if (error) {
+        console.warn("Could not refresh cart stock:", error);
+        if (!cancelled) setStockLoaded(true);
+        return;
+      }
+
+      if (!cancelled && data) {
+        const stockMap = new Map(
+          data.map((product) => [
+            Number(product.id),
+            product.stock_quantity === null || product.stock_quantity === undefined
+              ? null
+              : Number(product.stock_quantity),
+          ])
+        );
+
+        setItems((current) =>
+          current.map((item) => {
+            const stock = stockMap.get(Number(item.productId));
+
+            if (stock === undefined) return item;
+
+            const safeQuantity =
+              stock === null
+                ? Math.max(1, Number(item.quantity) || 1)
+                : stock <= 0
+                  ? 0
+                  : Math.min(Math.max(1, Number(item.quantity) || 1), stock);
+
+            return {
+              ...item,
+              stock_quantity: stock,
+              quantity: safeQuantity,
+            };
+          }).filter((item) => item.quantity > 0)
+        );
+      }
+
+      if (!cancelled) setStockLoaded(true);
+    }
+
+    refreshStock();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ready]);
 
   useEffect(() => {
     if (!ready) return;
@@ -64,17 +143,22 @@ export default function CartPage() {
 
   function updateQuantity(index: number, delta: number) {
     setItems((current) =>
-      current.map((item, i) =>
-        i === index
-          ? {
-              ...item,
-              quantity: Math.max(
-                1,
-                (Number(item.quantity) || 1) + delta
-              ),
-            }
-          : item
-      )
+      current.map((item, i) => {
+        if (i !== index) return item;
+
+        const currentQuantity = Math.max(1, Number(item.quantity) || 1);
+        const requestedQuantity = currentQuantity + delta;
+
+        if (delta > 0 && item.stock_quantity !== null && item.stock_quantity !== undefined) {
+          if (Number(item.stock_quantity) <= 0) return item;
+          if (requestedQuantity > Number(item.stock_quantity)) return item;
+        }
+
+        return {
+          ...item,
+          quantity: Math.max(1, requestedQuantity),
+        };
+      })
     );
   }
 
@@ -88,6 +172,24 @@ export default function CartPage() {
 
   function checkout() {
     if (!items.length) return;
+
+    const invalidStockItem = items.find(
+      (item) =>
+        item.stock_quantity !== null &&
+        item.stock_quantity !== undefined &&
+        (Number(item.stock_quantity) <= 0 ||
+          Number(item.quantity) > Number(item.stock_quantity))
+    );
+
+    if (invalidStockItem) {
+      alert(
+        `${invalidStockItem.name} has only ${Math.max(
+          0,
+          Number(invalidStockItem.stock_quantity) || 0
+        )} piece(s) available. Please adjust the quantity before checkout.`
+      );
+      return;
+    }
 
     localStorage.setItem(
       "imphal3d-cart-checkout",
@@ -162,6 +264,34 @@ export default function CartPage() {
           )}
         </div>
 
+        {items.length > 0 && (
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-4 py-3">
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400" />
+              <div>
+                <p className="text-xs font-black text-emerald-300">Pickup available</p>
+                <p className="text-[11px] text-gray-600">Local Imphal pickup</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-2xl border border-orange-500/15 bg-orange-500/5 px-4 py-3">
+              <ShoppingBag className="h-5 w-5 shrink-0 text-orange-400" />
+              <div>
+                <p className="text-xs font-black text-orange-300">Made to order</p>
+                <p className="text-[11px] text-gray-600">Personalized items prepared for you</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-2xl border border-blue-500/15 bg-blue-500/5 px-4 py-3">
+              <MapPin className="h-5 w-5 shrink-0 text-blue-400" />
+              <div>
+                <p className="text-xs font-black text-blue-300">PIN verified</p>
+                <p className="text-[11px] text-gray-600">Pickup details confirmed at checkout</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {items.length === 0 ? (
           <div className="mt-12 rounded-3xl border border-dashed border-white/10 bg-[#111214] px-6 py-20 text-center">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-orange-500/10 text-orange-400">
@@ -225,13 +355,15 @@ export default function CartPage() {
                           </span>
                         )}
                         {item.customName && (
-                          <span className="rounded-full border border-orange-500/20 bg-orange-500/10 px-2.5 py-1 text-orange-400">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/20 bg-orange-500/10 px-2.5 py-1 text-orange-300">
+                            <Type className="h-3.5 w-3.5" />
                             Name: {item.customName}
                           </span>
                         )}
                         {item.phoneNumber && (
-                          <span className="rounded-full border border-orange-500/20 bg-orange-500/10 px-2.5 py-1 text-orange-400">
-                            Phone: {item.phoneNumber}
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/20 bg-orange-500/10 px-2.5 py-1 text-orange-300">
+                            <Phone className="h-3.5 w-3.5" />
+                            Phone to print: {item.phoneNumber}
                           </span>
                         )}
                         {item.pincode && (
@@ -241,6 +373,40 @@ export default function CartPage() {
                           </span>
                         )}
                       </div>
+
+                      {item.stock_quantity !== undefined && item.stock_quantity !== null && (
+                        <div className="mt-3 flex items-center gap-2">
+                          {Number(item.stock_quantity) <= 0 ? (
+                            <>
+                              <AlertTriangle className="h-4 w-4 text-red-400" />
+                              <span className="text-xs font-bold text-red-400">
+                                Out of stock
+                              </span>
+                            </>
+                          ) : Number(item.quantity) >= Number(item.stock_quantity) ? (
+                            <>
+                              <AlertTriangle className="h-4 w-4 text-orange-400" />
+                              <span className="text-xs font-bold text-orange-400">
+                                Maximum available quantity: {item.stock_quantity}
+                              </span>
+                            </>
+                          ) : Number(item.stock_quantity) <= 5 ? (
+                            <>
+                              <AlertTriangle className="h-4 w-4 text-amber-400" />
+                              <span className="text-xs font-bold text-amber-300">
+                                Only {item.stock_quantity} piece{Number(item.stock_quantity) === 1 ? "" : "s"} left
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                              <span className="text-xs font-bold text-emerald-400">
+                                In stock
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      )}
 
                       <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
                         <div>
@@ -265,7 +431,12 @@ export default function CartPage() {
                             <button
                               type="button"
                               onClick={() => updateQuantity(index, 1)}
-                              className="rounded-lg p-2 text-gray-400 transition hover:bg-white/5 hover:text-white"
+                              disabled={
+                                item.stock_quantity !== null &&
+                                item.stock_quantity !== undefined &&
+                                Number(item.quantity) >= Number(item.stock_quantity)
+                              }
+                              className="rounded-lg p-2 text-gray-400 transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                               aria-label="Increase quantity"
                             >
                               <Plus className="h-4 w-4" />
@@ -362,9 +533,19 @@ export default function CartPage() {
               <button
                 type="button"
                 onClick={checkout}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 py-4 text-sm font-black text-black shadow-lg shadow-orange-500/20 transition hover:bg-orange-400 active:scale-[0.98]"
+                disabled={
+                  !stockLoaded ||
+                  items.some(
+                    (item) =>
+                      item.stock_quantity !== null &&
+                      item.stock_quantity !== undefined &&
+                      (Number(item.stock_quantity) <= 0 ||
+                        Number(item.quantity) > Number(item.stock_quantity))
+                  )
+                }
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 py-4 text-sm font-black text-black shadow-lg shadow-orange-500/20 transition hover:bg-orange-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Proceed to Checkout
+                {!stockLoaded ? "Checking Stock..." : "Proceed to Checkout"}
                 <ArrowRight className="h-4 w-4" />
               </button>
 
