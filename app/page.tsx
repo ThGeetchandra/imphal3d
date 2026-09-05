@@ -683,7 +683,7 @@ export default function Home() {
         </section>
 
         <footer className="border-t border-white/5 bg-[#08090a]">
-          <div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 px-4 py-14 sm:px-6 md:flex-row">
+          <div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 px-4 py-12 sm:px-6 sm:py-14 md:flex-row md:gap-16">
             <div>
               <div className="text-3xl font-black tracking-tight">
                 Imphal<span className="text-orange-500">3D</span>
@@ -697,41 +697,44 @@ export default function Home() {
               </p>
             </div>
 
-            <div>
+            <div className="w-full md:max-w-md">
               <p className="text-sm font-bold text-white">Contact & Connect</p>
 
-              <ul className="mt-4 space-y-3 text-xs text-gray-400">
+              <ul className="mt-4 space-y-3 text-sm text-gray-400">
                 <li className="flex items-center gap-2.5">
                   <MapPin className="h-4 w-4 shrink-0 text-orange-500" />
                   <span>Imphal, Manipur</span>
                 </li>
 
-                <li className="flex items-center gap-2.5">
+                <li className="flex min-w-0 items-start gap-2.5">
                   <Phone className="h-4 w-4 shrink-0 text-orange-500" />
                   <a
                     href="tel:+919774424640"
-                    className="transition hover:text-white"
+                    className="inline-flex min-w-0 items-center gap-2 transition hover:text-white"
                   >
-                    +91 97744 24640
+                    <span className="shrink-0 rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-bold text-orange-400">
+                      +91
+                    </span>
+                    <span className="tracking-wide">97744 24640</span>
                   </a>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <span className="text-base text-orange-500">✉</span>
+                <li className="flex min-w-0 items-start gap-2.5">
+                  <span className="mt-0.5 shrink-0 text-base text-orange-500">✉</span>
                   <a
                     href="mailto:imphal3d@gmail.com"
-                    className="transition hover:text-white"
+                    className="break-all transition hover:text-white"
                   >
                     imphal3d@gmail.com
                   </a>
                 </li>
               </ul>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-5 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                 <a
                   href="https://wa.me/919774424640"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-bold text-gray-300 transition hover:border-emerald-500/50 hover:text-emerald-400"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs font-bold text-gray-300 transition hover:border-emerald-500/50 hover:text-emerald-400 sm:w-auto"
                 >
                   WhatsApp
                   <ExternalLink className="h-3 w-3" />
@@ -741,7 +744,7 @@ export default function Home() {
                   href="https://www.instagram.com/imphal_3d?igsi=MTVsNjRoZ3ZrZ3dzYQ%3D%3D&utm_source=qr"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-bold text-gray-300 transition hover:border-pink-500/50 hover:text-pink-400"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs font-bold text-gray-300 transition hover:border-pink-500/50 hover:text-pink-400 sm:w-auto"
                 >
                   Instagram
                   <ExternalLink className="h-3 w-3" />
@@ -753,12 +756,12 @@ export default function Home() {
                   Pickup Locations
                 </p>
 
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                   <a
                     href="https://maps.app.goo.gl/h3ZzrtKESCrc2dfNA"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-gray-300 transition hover:border-orange-500/50 hover:text-white"
+                    className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] font-bold text-gray-300 transition hover:border-orange-500/50 hover:text-white sm:w-auto"
                   >
                     📍 Location 1
                     <ExternalLink className="h-3 w-3 opacity-60" />
@@ -768,7 +771,7 @@ export default function Home() {
                     href="https://maps.app.goo.gl/TMppWL8kLyiLkEjk7?g_st=ic"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-gray-300 transition hover:border-orange-500/50 hover:text-white"
+                    className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] font-bold text-gray-300 transition hover:border-orange-500/50 hover:text-white sm:w-auto"
                   >
                     📍 Location 2
                     <ExternalLink className="h-3 w-3 opacity-60" />
