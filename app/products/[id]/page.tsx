@@ -168,6 +168,11 @@ export default function ProductPage() {
   const isCustomNameProduct = product.is_customizable === true;
   const isPhoneNumberProduct = product.is_phone_number_customizable === true;
 
+  const isPetNameTag =
+    product.name.trim().toLowerCase().includes("pet name tag");
+
+  const customNameMaxLength = isPetNameTag ? 10 : 30;
+
   const stockQuantity =
     product.stock_quantity === null || product.stock_quantity === undefined
       ? null
@@ -696,16 +701,16 @@ export default function ProductPage() {
                 <input
                   type="text"
                   value={customName}
-                  onChange={(e) => setCustomName(e.target.value.slice(0, 30))}
-                  maxLength={30}
+                  onChange={(e) => setCustomName(e.target.value.slice(0, customNameMaxLength))}
+                  maxLength={customNameMaxLength}
                   placeholder="Enter name, e.g. Sarangthem"
                   className="mt-4 w-full rounded-2xl border border-white/15 bg-[#08090a] px-4 py-3.5 text-sm text-white placeholder-gray-600 outline-none transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
                 />
 
                 <div className="mt-2.5 flex justify-between text-[11px] font-medium text-gray-500">
-                  <span>Maximum 30 characters</span>
-                  <span className={customName.length >= 25 ? "text-orange-400 font-bold" : ""}>
-                    {customName.length}/30
+                  <span>Maximum {customNameMaxLength} characters</span>
+                  <span className={customName.length >= Math.max(1, customNameMaxLength - 2) ? "text-orange-400 font-bold" : ""}>
+                    {customName.length}/{customNameMaxLength}
                   </span>
                 </div>
               </div>
@@ -1100,6 +1105,12 @@ export default function ProductPage() {
                   className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-xs font-black text-black shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400 active:scale-95"
                 >
                   <MessageCircle className="h-4 w-4 fill-current" /> WhatsApp
+                </a>
+                <a
+                  href="mailto:imphal3d@gmail.com"
+                  className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#08090a] px-4 py-3 text-xs font-bold text-white transition-all hover:border-orange-500/50 hover:bg-white/5 active:scale-95"
+                >
+                  ✉️ imphal3d@gmail.com
                 </a>
                 <a
                   href="https://www.instagram.com/imphal_3d?igsi=MTVsNjRoZ3ZrZ3dzYQ%3D%3D&utm_source=qr"
