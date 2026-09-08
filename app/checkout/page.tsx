@@ -268,6 +268,10 @@ function CheckoutContent() {
 
     const orderNumber = generateOrderNumber();
 
+    // Link the order to the currently signed-in customer, if any.
+    // Guests can still place orders because user_id remains null.
+    const { data: { user } } = await supabase.auth.getUser();
+
     const customerRequest = [
       needsPrintName && customName.trim()
         ? `Name / Text to Print: ${customName.trim()}`
@@ -284,7 +288,8 @@ function CheckoutContent() {
         order_number: orderNumber,
         customer_name: customerName.trim(),
         customer_phone: cleanPhone,
-        customer_email: null,
+        customer_email: user?.email || null,
+        user_id: user?.id || null,
         product_name: checkoutProduct,
         product_size: isCartCheckout ? "Multiple" : (size || null),
         color: isCartCheckout ? "Multiple" : colour,
