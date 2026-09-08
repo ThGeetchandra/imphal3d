@@ -1141,14 +1141,12 @@ Imphal3D`.trim();
 
               {/* WARNING */}
 
-              <p className="payment-warning">
+              {/* WARNING */}
 
-                ⚠️ Please complete the
-                payment before submitting
-                your order.
-
-              </p>
-
+<p className="payment-warning">
+  ⚠️ Please complete the details
+  before submitting your order.
+</p>
 
               {/* =========================
                   ORDER SUBMITTED STATUS

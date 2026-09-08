@@ -12,7 +12,6 @@ import {
   Sparkles,
   Loader2,
   Phone,
-  Mail,
   ArrowRight,
   ExternalLink,
   ShieldCheck,
@@ -45,10 +44,19 @@ export default function Home() {
   const [cartCount, setCartCount] = useState(0);
   const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showcaseIndex, setShowcaseIndex] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowIntro(false), 1700);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setShowcaseIndex((current) => (current + 1) % 2);
+    }, 3000);
+
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -93,7 +101,10 @@ export default function Home() {
 
         if (!promptShown) {
           setShowLoginPrompt(true);
-          sessionStorage.setItem("imphal3d-login-prompt-shown", "true");
+          sessionStorage.setItem(
+            "imphal3d-login-prompt-shown",
+            "true"
+          );
         }
       }
     }
@@ -223,17 +234,16 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#08090a] font-sans text-white selection:bg-orange-500/30 selection:text-orange-400">
-      {/* Guest Login Modal */}
       {showLoginPrompt && !isCustomerLoggedIn && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 px-4 backdrop-blur-md">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="login-prompt-title"
             className="w-full max-w-md rounded-3xl border border-white/10 bg-[#111214] p-6 shadow-2xl sm:p-8"
           >
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-orange-500/30 bg-orange-500/10 text-orange-500 shadow-inner">
-              <UserRound className="h-7 w-7" />
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-500/10">
+              <UserRound className="h-7 w-7 text-orange-500" />
             </div>
 
             <h2
@@ -251,16 +261,15 @@ export default function Home() {
             <div className="mt-6 grid gap-3">
               <a
                 href="/login"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-3.5 text-sm font-black text-black transition hover:bg-orange-400 active:scale-[0.99]"
+                className="flex w-full items-center justify-center rounded-xl bg-orange-500 px-5 py-3.5 text-sm font-black text-black transition hover:bg-orange-400"
               >
-                <span>Login / Sign In</span>
-                <ArrowRight className="h-4 w-4" />
+                Login / Sign In
               </a>
 
               <button
                 type="button"
                 onClick={handleGuestLoginSkip}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-sm font-bold text-gray-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.99]"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3.5 text-sm font-bold text-gray-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
               >
                 Continue as Guest
               </button>
@@ -269,7 +278,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Splash Intro Animation */}
       {showIntro && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#08090a]/98 px-4 backdrop-blur-2xl">
           <div className="animate-[fadeIn_0.8s_cubic-bezier(0.16,1,0.3,1)] text-center">
@@ -317,7 +325,6 @@ export default function Home() {
           showIntro ? "pointer-events-none opacity-0" : "opacity-100"
         }`}
       >
-        {/* Top Info Bar */}
         <div className="sticky top-0 z-50 border-b border-white/5 bg-[#0d0e10]/95 text-xs backdrop-blur-md">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6">
             <div className="flex items-center gap-2.5 font-medium text-gray-300">
@@ -326,7 +333,7 @@ export default function Home() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
               <div className="flex items-center gap-1.5 text-gray-400">
-                <MapPin className="h-3.5 w-3.5 text-orange-400 shrink-0" />
+                <MapPin className="h-3.5 w-3.5 text-orange-400" />
                 <span>Imphal, Manipur</span>
               </div>
             </div>
@@ -340,7 +347,7 @@ export default function Home() {
                 Custom Orders
               </a>
               <span className="h-3 w-px bg-white/10" />
-              <span className="flex items-center gap-1.5 font-semibold text-orange-400/90">
+              <span className="flex items-center gap-1 font-semibold text-orange-400/90">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Premium 3D Printing
               </span>
@@ -348,21 +355,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Main Header */}
         <header className="sticky top-[33px] z-40 border-b border-white/10 bg-[#08090a]/90 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
             <a href="/" className="group flex shrink-0 items-center gap-3">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-0.5 transition group-hover:scale-105">
-                  <span className="text-3xl font-black leading-none tracking-tighter text-purple-500">
-                    I
-                  </span>
-                  <span className="text-3xl font-black leading-none tracking-tighter text-yellow-400">
-                    3
-                  </span>
-                  <span className="text-3xl font-black leading-none tracking-tighter text-blue-500">
-                    D
-                  </span>
+                  <span className="text-3xl font-black leading-none tracking-tighter text-purple-500">I</span>
+                  <span className="text-3xl font-black leading-none tracking-tighter text-yellow-400">3</span>
+                  <span className="text-3xl font-black leading-none tracking-tighter text-blue-500">D</span>
                 </div>
               </div>
               <div>
@@ -379,9 +379,7 @@ export default function Home() {
               <a
                 href={isCustomerLoggedIn ? "/my-orders" : "/login"}
                 className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-bold text-gray-300 transition hover:border-orange-500/40 hover:bg-orange-500/10 hover:text-orange-400 sm:px-4"
-                aria-label={
-                  isCustomerLoggedIn ? "Open my orders" : "Customer login"
-                }
+                aria-label={isCustomerLoggedIn ? "Open my orders" : "Customer login"}
               >
                 <UserRound className="h-4 w-4" />
                 <span className="hidden sm:inline">
@@ -416,9 +414,9 @@ export default function Home() {
               </a>
             </div>
           </div>
+
         </header>
 
-        {/* Category Sticky Navigation */}
         <nav className="sticky top-[101px] z-30 border-b border-white/5 bg-[#0d0e10]/80 backdrop-blur-md md:top-[89px]">
           <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2.5 text-xs font-bold whitespace-nowrap sm:px-6">
             {categories.map((category) => (
@@ -444,7 +442,6 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* Hero Section */}
         <section className="relative overflow-hidden border-b border-white/10 py-12 sm:py-28 lg:py-36">
           <div className="absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500/10 blur-[140px]" />
           <div className="absolute right-0 top-0 -z-10 h-[350px] w-[350px] rounded-full bg-purple-500/10 blur-[120px]" />
@@ -510,11 +507,75 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Shop Grid Section */}
-        <section
-          id="shop"
-          className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20"
-        >
+        <section className="border-y border-white/5 bg-[#0a0b0d]">
+          <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.3em] text-orange-500">
+                  Customer Showcase
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-4xl">
+                  Custom work we&apos;ve made
+                </h2>
+                <p className="mt-2 max-w-2xl text-xs leading-relaxed text-gray-400 sm:text-sm">
+                  A look at some of the custom products we have made for our customers.
+                </p>
+              </div>
+
+              <div className="hidden shrink-0 items-center gap-2 sm:flex" aria-hidden="true">
+                <span
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    showcaseIndex === 0 ? "w-7 bg-orange-500" : "w-2.5 bg-white/20"
+                  }`}
+                />
+                <span
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    showcaseIndex === 1 ? "w-7 bg-orange-500" : "w-2.5 bg-white/20"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-[#111215] sm:mt-8 sm:rounded-3xl">
+              <div className="relative flex h-[280px] items-center justify-center p-3 sm:h-[430px] sm:p-8 md:h-[500px]">
+                <img
+                  key={showcaseIndex}
+                  src={
+                    showcaseIndex === 0
+                      ? "/showcase/customer-product-1.png"
+                      : "/showcase/customer-product-2.png"
+                  }
+                  alt={
+                    showcaseIndex === 0
+                      ? "Custom LED sign made by Imphal3D"
+                      : "Custom LED sign made by Imphal3D"
+                  }
+                  className="block max-h-full max-w-full object-contain drop-shadow-2xl animate-[showcaseFade_0.6s_ease-in-out]"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowcaseIndex(0)}
+                  aria-label="Show first customer product"
+                  className="absolute bottom-3 left-1/2 h-2.5 w-2.5 -translate-x-[calc(50%+10px)] rounded-full bg-white/40 transition hover:bg-white sm:bottom-5"
+                >
+                  <span className="sr-only">First product</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowcaseIndex(1)}
+                  aria-label="Show second customer product"
+                  className="absolute bottom-3 left-1/2 h-2.5 w-2.5 translate-x-[10px] rounded-full bg-white/40 transition hover:bg-white sm:bottom-5"
+                >
+                  <span className="sr-only">Second product</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="shop" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
           <div className="flex flex-col justify-between gap-4 border-b border-white/5 pb-8 sm:flex-row sm:items-end">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.3em] text-orange-500">
@@ -534,9 +595,7 @@ export default function Home() {
             <div className="mt-5 flex items-center justify-between gap-4">
               <p className="text-xs text-gray-500">
                 Showing{" "}
-                <span className="font-bold text-white">
-                  {selectedCategory}
-                </span>
+                <span className="font-bold text-white">{selectedCategory}</span>
                 {" · "}
                 {filteredProducts.length} product
                 {filteredProducts.length === 1 ? "" : "s"}
@@ -709,7 +768,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* Custom Request Banner Card */}
             <div className="group relative flex min-h-[300px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-b from-[#181411] to-[#0d0e10] p-4 text-center shadow-xl transition hover:border-orange-500/60 sm:min-h-[380px] sm:rounded-3xl sm:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.12),transparent_70%)]" />
 
@@ -729,7 +787,7 @@ export default function Home() {
                   href="/custom-order"
                   className="mt-6 inline-flex items-center gap-2 rounded-xl border border-orange-500 px-6 py-3 text-xs font-black text-orange-400 transition hover:bg-orange-500 hover:text-black active:scale-95"
                 >
-                  <span>Request Custom Order</span>
+                  Request Custom Order
                   <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>
@@ -737,7 +795,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Feature Highlights */}
         <section className="border-y border-white/10 bg-[#0d0e10]/60">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
             <div className="text-center">
@@ -754,9 +811,7 @@ export default function Home() {
                 <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/10 text-orange-400 sm:h-12 sm:w-12 md:h-14 md:w-14 md:rounded-2xl">
                   <Printer className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
                 </div>
-                <h3 className="mt-3 text-xs font-bold leading-tight sm:mt-4 sm:text-sm md:mt-5 md:text-lg">
-                  Quality 3D Printing
-                </h3>
+                <h3 className="mt-3 text-xs font-bold leading-tight sm:mt-4 sm:text-sm md:mt-5 md:text-lg">Quality 3D Printing</h3>
                 <p className="mt-2 text-[9px] leading-snug text-gray-400 sm:text-[10px] md:text-xs md:leading-relaxed">
                   Carefully printed products with clean details, strong
                   materials, and attention to finish.
@@ -767,9 +822,7 @@ export default function Home() {
                 <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/10 text-orange-400 sm:h-12 sm:w-12 md:h-14 md:w-14 md:rounded-2xl">
                   <Palette className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
                 </div>
-                <h3 className="mt-3 text-xs font-bold leading-tight sm:mt-4 sm:text-sm md:mt-5 md:text-lg">
-                  Custom Options
-                </h3>
+                <h3 className="mt-3 text-xs font-bold leading-tight sm:mt-4 sm:text-sm md:mt-5 md:text-lg">Custom Options</h3>
                 <p className="mt-2 text-[9px] leading-snug text-gray-400 sm:text-[10px] md:text-xs md:leading-relaxed">
                   Choose available colours, sizes, and personalization options
                   for selected products.
@@ -780,9 +833,7 @@ export default function Home() {
                 <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/10 text-orange-400 sm:h-12 sm:w-12 md:h-14 md:w-14 md:rounded-2xl">
                   <MapPin className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
                 </div>
-                <h3 className="mt-3 text-xs font-bold leading-tight sm:mt-4 sm:text-sm md:mt-5 md:text-lg">
-                  Made in Imphal
-                </h3>
+                <h3 className="mt-3 text-xs font-bold leading-tight sm:mt-4 sm:text-sm md:mt-5 md:text-lg">Made in Imphal</h3>
                 <p className="mt-2 text-[9px] leading-snug text-gray-400 sm:text-[10px] md:text-xs md:leading-relaxed">
                   Designed, produced, and supported locally from Imphal,
                   Manipur.
@@ -792,7 +843,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="border-t border-white/5 bg-[#08090a]">
           <div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 px-4 py-12 sm:px-6 sm:py-14 md:flex-row md:gap-16">
             <div>
@@ -818,7 +868,7 @@ export default function Home() {
                 </li>
 
                 <li className="flex min-w-0 items-start gap-2.5">
-                  <Phone className="h-4 w-4 shrink-0 text-orange-500 mt-0.5" />
+                  <Phone className="h-4 w-4 shrink-0 text-orange-500" />
                   <div className="flex min-w-0 flex-wrap items-center gap-1">
                     <a
                       href="tel:+919862135090"
@@ -835,9 +885,8 @@ export default function Home() {
                     </a>
                   </div>
                 </li>
-
-                <li className="flex min-w-0 items-center gap-2.5">
-                  <Mail className="h-4 w-4 shrink-0 text-orange-500" />
+                <li className="flex min-w-0 items-start gap-2.5">
+                  <span className="mt-0.5 shrink-0 text-base text-orange-500">✉</span>
                   <a
                     href="mailto:imphal3d@gmail.com"
                     className="break-all transition hover:text-white"
@@ -892,10 +941,9 @@ export default function Home() {
                     href="https://maps.app.goo.gl/h3ZzrtKESCrc2dfNA"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] font-bold text-gray-300 transition hover:border-orange-500/50 hover:text-white sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] font-bold text-gray-300 transition hover:border-orange-500/50 hover:text-white sm:w-auto"
                   >
-                    <MapPin className="h-3.5 w-3.5 text-orange-400 shrink-0" />
-                    <span>Haobam Marak</span>
+                    📍 Haobam Marak
                     <ExternalLink className="h-3 w-3 opacity-60" />
                   </a>
 
@@ -903,14 +951,14 @@ export default function Home() {
                     href="https://maps.app.goo.gl/TMppWL8kLyiLkEjk7?g_st=ic"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] font-bold text-gray-300 transition hover:border-orange-500/50 hover:text-white sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] font-bold text-gray-300 transition hover:border-orange-500/50 hover:text-white sm:w-auto"
                   >
-                    <MapPin className="h-3.5 w-3.5 text-orange-400 shrink-0" />
-                    <span>Wangkhei</span>
+                    📍 Wangkhei
                     <ExternalLink className="h-3 w-3 opacity-60" />
                   </a>
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -925,6 +973,17 @@ export default function Home() {
           from {
             opacity: 0;
             transform: scale(0.96);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes showcaseFade {
+          from {
+            opacity: 0;
+            transform: scale(0.985);
           }
           to {
             opacity: 1;
